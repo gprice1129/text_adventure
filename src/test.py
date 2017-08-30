@@ -2,6 +2,7 @@ from Actor import *
 from Node import *
 from Command import *
 from Link import *
+import Interface
 import Constants
 
 # Simple example of a game
@@ -17,15 +18,20 @@ nodeA.undirectedConnect(nodeB, "Grey hallway")
 nodeA.directedConnect(nodeC, "Green doorway")
 nodeC.directedConnect(nodeA, "White doorway")
 nodeD.undirectedConnect(nodeB, "Ladder")
-
 # Build the player
-player_commands = {"use": MoveCommand()}
-player = Actor("Some dude", commandList=player_commands, location=NodeA)
+player_commands = {"use": Move()}
+player = Actor("Some person", commandList=player_commands, location=nodeA)
 
 # Main loop
 
 running = True
 
 while running:
-    
-
+    Interface.output(player.location.describe())
+    commandName = Interface.getInput("Enter a command: ")    
+    command = player.getCommand(commandName)
+    argumentPrompt = command.getArgumentPrompt()
+    arguments = Interface.getInput(argumentPrompt)
+    executionSuccess = command.execute(arguments)
+    if (not executionSuccess):
+        Interface.output("I can't do that...")

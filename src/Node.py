@@ -2,22 +2,23 @@ from GameObject import *
 from Link import Link
 
 class Node(GameObject):
-    def __init__(self, description, actors=[], items=[], links=[]):
-        super(description)
+    def __init__(self, description, actors=list(), items=list(), links=list()):
+        super().__init__(description)
         self.actors = GameObjectContainer(actors);
         self.items = GameObjectContainer(items);
         self.links = GameObjectContainer(links);
 
     def describe(self):
-        print self.description
-        print "Actors: " + actors.describe()
-        print "Items: " + items.describe()
-        print "Links: " + links.describe() 
+        description = self.description 
+        description += "\nActors: " + self.actors.describe()
+        description += "\nItems: " + self.items.describe()
+        description += "\nLinks: " + self.links.describe() 
+        return description
 
     def remove(self, gameObject, container):
-        if (container.count(gameObject) > 0):
+        if (gameObject in container):
             container.remove(gameObject)
-    
+                
     def append(self, gameObject, container):
         container.append(gameObject)
 
@@ -40,9 +41,9 @@ class Node(GameObject):
         self.append(link, self.links)
 
     def directedConnect(self, node, linkDescription=""):
-        link = Link(linkDescription, self, node)
-        self.appendLink(link) 
+        self.appendLink(Link(linkDescription, self, node))
+        print(self.links.objects is node.links.objects)
 
     def undirectedConnect(self, node, linkDescription=""):
-        self.directedConnect(node, linkDescription)
-        node.directedConnect(self, linkDescription) 
+        self.appendLink(Link(linkDescription, self, node))
+        node.appendLink(Link(linkDescription, node, self))
