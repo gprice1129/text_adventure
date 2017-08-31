@@ -28,10 +28,11 @@ running = True
 
 while running:
     Interface.output(player.location.describe())
-    commandName = Interface.getInput("Enter a command: ")    
+    commandName = Interface.getCommand("Enter a command: ")    
     command = player.getCommand(commandName)
-    argumentPrompt = command.getArgumentPrompt()
-    arguments = Interface.getInput(argumentPrompt)
-    executionSuccess = command.execute(arguments)
-    if (not executionSuccess):
-        Interface.output("I can't do that...")
+    if (command != None):
+        argumentPrompt = command.getArgumentPrompt()
+        arguments = Interface.getInput(argumentPrompt)
+        executionSuccess = command.execute(arguments)
+    if (command == None or not executionSuccess):
+        print("I can't do that...")
