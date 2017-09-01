@@ -1,17 +1,24 @@
+import Constants
+from Action import *
+
 class Command:
     """Base class for all commands"""
-    def __init__(self, actor=None):
+    def __init__(self, actor=None, action=None):
         self.registeredActor = actor
+        self.action = action
 
     def registerActor(self, actor):
         if (actor is None):
            raise ValueError("Cannot register this command to 'None'") 
         self.registeredActor = actor
 
-    def getArgumentPrompt(self):
-        return None
+    def errorMessage(self):
+        return Constants.Strings.default_error_message
 
     def validate(self, arguments):
+        pass
+
+    def options(self):
         pass
 
     def execute(self, arguments):
@@ -31,33 +38,35 @@ class CommandList:
     def getCommandActions(self):
         return self.commands.values()
 
-class Move(Command):
-    def getArgumentPrompt(self):
-        prompt = ""
-        links = self.registeredActor.location.links
-        for i in range(len(links)):
-            prompt += str(i + 1) + ". " + links[i].describe() + "\n"
-        prompt += "Choose where you'd like to move: "
-        return prompt
+class MoveCommand(Command):
+    def __init__(self):
+        super().__init__(action=MoveAction())
 
     def validate(self, arguments):
-        tokens = arguments.split()
-        if (len(tokens) == 0):
-            return None 
-        argument = tokens[0]
-        if (not argument.isdigit()):
+        if (arguments == ""):
             return None
-        linkIndex = int(argument)
-        if (linkIndex > len(self.registeredActor.location.links)):
+        arguments = arguments.split()
+        if (arguments[0] == "move"):
+            if (len(arguments == 1)):
+                return None
+            arguments = arguments[1:]
+        arguments = " ".join(arguments)
+        links = self.options()
+        validKeys = [x for x in links if x.startswith(arguments)]
+        if (len(validKeys) != 1):
             return None
-        return (linkIndex - 1)
+        return validKeys[0]
+
+    def options(self):
+        return self.registeredActor.location.links.keys()
+         
+    def errorMessage(self):
+        return "I can't move there... "
          
     def execute(self, arguments):
-        linkIndex = self.validate(arguments)
-        if (linkIndex == None):
+        linkName = self.validate(arguments)
+        if (linkName == None):
             return False
-        link = self.registeredActor.location.links[linkIndex]
-        link.source.removeActor(self.registeredActor)
-        link.destination.appendActor(self.registeredActor)
-        self.registeredActor.location = link.destination
+        link = self.registeredActor.location.links[linkName]
+        self.action.execute(actor=self.registeredActor, link=link)
         return True

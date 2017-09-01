@@ -2,48 +2,51 @@ from GameObject import *
 from Link import Link
 
 class Node(GameObject):
-    def __init__(self, description, actors=list(), items=list(), links=list()):
+    def __init__(self, description, firstDescription=None, 
+            actors=dict(), items=dict(), links=dict()):
         super().__init__(description)
-        self.actors = GameObjectContainer(actors);
-        self.items = GameObjectContainer(items);
-        self.links = GameObjectContainer(links);
+        self.visited = False
+        self.firstDescription = firstDescription
+        self.actors = GameObjectDictionary(actors)
+        self.items = GameObjectDictionary(items)
+        self.links = GameObjectDictionary(links)
 
     def describe(self):
-        description = self.description 
-        description += "\nActors: " + self.actors.describe()
-        description += "\nItems: " + self.items.describe()
-        description += "\nLinks: " + self.links.describe() 
-        return description
+        if (self.visited):
+            return self.description
+        self.visited = True
+        if (self.firstDescription == None):
+            return self.description
+        return self.firstDescription
 
     def remove(self, gameObject, container):
-        if (gameObject in container):
+        if (gameObject.key() in container):
             container.remove(gameObject)
                 
-    def append(self, gameObject, container):
-        container.append(gameObject)
+    def insert(self, gameObject, container):
+        container.insert(gameObject)
 
     def removeActor(self, actor):
         self.remove(actor, self.actors)
 
-    def appendActor(self, actor):
-        self.append(actor, self.actors)
+    def insertActor(self, actor):
+        self.insert(actor, self.actors)
 
     def removeItem(self, item):
         self.remove(item, self.items)
 
-    def appendItem(self, item):
-        self.append(item, self.items)
+    def insertItem(self, item):
+        self.insert(item, self.items)
                             
     def removeLink(self, link):
         self.remove(link, self.links)
 
-    def appendLink(self, link):
-        self.append(link, self.links)
+    def insertLink(self, link):
+        self.insert(link, self.links)
 
     def directedConnect(self, node, linkDescription=""):
-        self.appendLink(Link(linkDescription, self, node))
-        print(self.links.objects is node.links.objects)
+        self.insertLink(Link(linkDescription, self, node))
 
     def undirectedConnect(self, node, linkDescription=""):
-        self.appendLink(Link(linkDescription, self, node))
-        node.appendLink(Link(linkDescription, node, self))
+        self.insertLink(Link(linkDescription, self, node))
+        node.insertLink(Link(linkDescription, node, self))
