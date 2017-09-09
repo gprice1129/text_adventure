@@ -44,9 +44,9 @@ class Node(GameObject):
     def insertLink(self, link):
         self.insert(link, self.links)
 
-    def directedConnect(self, node, linkDescription=""):
-        self.insertLink(Link(linkDescription, self, node))
+    def directedConnect(self, node, validCommands, linkDescription=""):
+        self.insertLink(Link(linkDescription, self, node, validCommands))
 
-    def undirectedConnect(self, node, linkDescription=""):
-        self.insertLink(Link(linkDescription, self, node))
-        node.insertLink(Link(linkDescription, node, self))
+    def undirectedConnect(self, node, validCommands, linkDescription=""):
+        self.directedConnect(node, validCommands, linkDescription)
+        node.directedConnect(self, validCommands, linkDescription)

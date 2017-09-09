@@ -22,14 +22,18 @@ nodeD = Node("""You climb the ladder and find yourself in a dimly lit room. Ther
 Looking closer at the floor you can see blood stains. You get the feeling you should leave as soon as possible.""")
 
 # Build the links 
-nodeA.undirectedConnect(nodeB, "Grey hallway")
-nodeA.directedConnect(nodeC, "Green doorway")
-nodeC.directedConnect(nodeA, "White doorway")
-nodeD.undirectedConnect(nodeB, "Ladder")
+nodeA.undirectedConnect(nodeB, ["use"], "Grey hallway")
+nodeA.directedConnect(nodeC, ["use", "open"], "Green doorway")
+nodeC.directedConnect(nodeA, ["use", "open"], "White doorway")
+nodeD.undirectedConnect(nodeB, ["use", "climb"], "Ladder")
 
 # Build the player
-player_commands = {"move": MoveCommand()}
+player_commands = {"use": UseCommand(), 
+                   "open": OpenCommand(),
+                   "climb": ClimbCommand()}
 player = Actor("Some person", commandList=player_commands, location=nodeA)
+
+
 
 # Create the interface
 interface = Interface(default="Enter a command: ", options=player_commands)
@@ -38,7 +42,9 @@ interface = Interface(default="Enter a command: ", options=player_commands)
 running = True
 
 while running:
-    interface.output(player.location.describe())
+    if (player.moved):
+        interface.output(player.location.describe())
+        player.moved = False
     userInput = interface.getInput()
     commandName, arguments = interface.getCommand(userInput)
     command = player.getCommand(commandName)

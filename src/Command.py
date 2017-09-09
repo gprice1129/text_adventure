@@ -39,14 +39,15 @@ class CommandList:
         return self.commands.values()
 
 class MoveCommand(Command):
-    def __init__(self):
+    def __init__(self, identifier):
         super().__init__(action=MoveAction())
+        self.identifier = identifier
 
     def validate(self, arguments):
         if (arguments == ""):
             return None
         arguments = arguments.split()
-        if (arguments[0] == "move"):
+        if (arguments[0] == self.identifier):
             if (len(arguments == 1)):
                 return None
             arguments = arguments[1:]
@@ -57,8 +58,12 @@ class MoveCommand(Command):
             return None
         return validKeys[0]
 
+    def registerLink(self, link):
+        link.registerCommands([self])
+
     def options(self):
-        return self.registeredActor.location.links.keys()
+        links = self.registeredActor.location.links
+        return [x for x in links.keys() if self.identifier in links[x].validCommands]
          
     def errorMessage(self):
         return "I can't move there... "
@@ -68,5 +73,30 @@ class MoveCommand(Command):
         if (linkName == None):
             return False
         link = self.registeredActor.location.links[linkName]
-        self.action.execute(actor=self.registeredActor, link=link)
-        return True
+        if (link.validate(self.identifier)):
+            self.action.execute(actor=self.registeredActor, link=link)
+            self.registeredActor.moved = True
+            return True
+        else: 
+            return False
+
+class ClimbCommand(MoveCommand):
+    def __init__(self):
+        super().__init__(identifier="climb")
+
+    def errorMessage(self):
+        return "I can't use that to climb... "
+
+class OpenCommand(MoveCommand):
+    def __init__(self):
+        super().__init__(identifier="open")
+
+    def errorMessage(self):
+        return "I can't open that... "
+
+class UseCommand(MoveCommand):
+    def __init__(self):
+        super().__init__(identifier="use")
+        
+    def errorMessage(self):
+        return "I can't use that... "

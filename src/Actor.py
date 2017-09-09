@@ -11,6 +11,7 @@ class Actor(GameObject):
         self.location = location
         if (location != None):
             location.insertActor(self)
+        self.moved = True
 
     def getCommand(self, commandName):
         if (self.commandList.hasCommand(commandName)):
